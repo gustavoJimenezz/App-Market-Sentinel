@@ -1,0 +1,58 @@
+[tool.poetry]
+name = "market-sentinel"
+version = "0.1.0"
+description = "Intelligent SaaS & App Store analytics platform"
+authors = ["gjimenez"]
+readme = "README.md"
+packages = [{ include = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115"
+uvicorn = { version = "^0.34", extras = ["standard"] }
+sqlalchemy = { version = "^2.0", extras = ["asyncio"] }
+asyncpg = "^0.30"
+pydantic-settings = "^2.7"
+httpx = "^0.28"
+redis = "^5.2"
+arq = "^0.26"
+polars = "^1.20"
+beautifulsoup4 = "^4.12"
+tenacity = "^9.0"
+structlog = "^24.4"
+alembic = "^1.14"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3"
+pytest-asyncio = "^0.25"
+ruff = "^0.9"
+pre-commit = "^4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+    "TCH", # flake8-type-checking
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

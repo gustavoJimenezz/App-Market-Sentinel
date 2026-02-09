@@ -1,7 +1,6 @@
 # **`Programa de Alto Rendimiento: AI & AppSec (24 Semanas)`**
 
-ProgramaDominio de SQL y Python para Datos: Es la base de todo lo que sigue.
-
+- ProgramaDominio de SQL y Python para Datos: Es la base de todo lo que sigue.
 - RAG y Orquestación (LangChain): Para entrar en la ola de la IA.
 - Docker y Cloud (AWS): Para que dejes de ser un "programador de PC" y seas un "Ingeniero de Sistemas".
 - Especialización en Seguridad (AppSec): A largo plazo, para blindar tu carrera.
