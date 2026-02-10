@@ -1,3 +1,100 @@
+# Market Sentinel
+
+Plataforma async-first de analítica para App Stores e inteligencia competitiva. Ingesta, normaliza y analiza datos (precios, reviews, changelogs) de marketplaces de aplicaciones.
+
+## Tech Stack
+
+- **Python 3.12+** (async-first, fully typed)
+- **FastAPI** + Uvicorn (async REST API)
+- **PostgreSQL 16** via async SQLAlchemy 2.0 + asyncpg
+- **Redis 7** + Arq (async background task queue)
+- **Polars** (data processing)
+- **Alembic** (migraciones de base de datos async)
+- **Docker Compose** (postgres, redis, app)
+- **Poetry** (dependency management)
+
+## Comandos de Ejecución
+
+```bash
+# Instalar dependencias
+poetry install
+
+# Levantar todos los servicios (postgres, redis, app en :8000)
+docker compose up --build
+
+# Ejecutar localmente (requiere postgres/redis corriendo por separado)
+poetry run uvicorn src.api:app --reload --host 0.0.0.0 --port 8000
+```
+
+## Migraciones de Base de Datos (Alembic)
+
+Alembic gestiona la evolución del esquema de PostgreSQL de forma versionada y reproducible. Está configurado para trabajar de forma **asíncrona** con `asyncpg`.
+
+```bash
+# Aplicar todas las migraciones pendientes
+poetry run alembic upgrade head
+
+# Revertir la última migración
+poetry run alembic downgrade -1
+
+# Generar nueva migración automática tras cambiar modelos
+poetry run alembic revision --autogenerate -m "descripción del cambio"
+
+# Ver la migración actual
+poetry run alembic current
+
+# Ver historial de migraciones
+poetry run alembic history
+```
+
+### Esquema actual (`001_initial_schema`)
+
+- **`apps`** — Catálogo de aplicaciones con constraint único `(bundle_id, store)`
+- **`price_history`** — Serie temporal de precios, particionada por mes (2026-2028) con índices BRIN
+- **`reviews`** — Reseñas con columna JSONB `metadata` e índice GIN
+
+## Tests
+
+```bash
+# Ejecutar todos los tests
+poetry run pytest
+
+# Ejecutar un archivo de test específico
+poetry run pytest tests/test_example.py
+
+# Ejecutar con output detallado
+poetry run pytest -v
+
+# Ejecutar tests que coincidan con un patrón
+poetry run pytest -k "test_nombre"
+```
+
+## Lint y Formato
+
+```bash
+# Verificar y corregir estilo
+ruff check src/ --fix
+
+# Formatear código
+ruff format src/
+
+# Pre-commit hooks (instalar una vez)
+pre-commit install
+pre-commit run --all-files
+```
+
+## Arquitectura
+
+```
+src/
+├── api/          # FastAPI app, REST endpoints
+├── core/         # Config (Pydantic Settings), database engine
+├── modules/      # Dominios de negocio (apps, scraping, analytics)
+└── worker/       # Arq background jobs
+```
+
+---
+
 # **`Programa de Alto Rendimiento: AI & AppSec (24 Semanas)`**
 
 - ProgramaDominio de SQL y Python para Datos: Es la base de todo lo que sigue.
