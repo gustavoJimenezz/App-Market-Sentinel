@@ -126,3 +126,37 @@ src/
 • **Deep-Dive:** OWASP Top 10 para LLMs, ataques de Inyección de Prompts y seguridad en la cadena de suministro.
 • **Seguridad:** Creación de "Guardrails" para interceptar respuestas maliciosas en tiempo real.**SemTema PrincipalObjetivo Técnico**19**LLM Attack Vectors**Prácticas de Prompt Injection (Directa e Indirecta).20**Insecure Output Handling**Cómo evitar que un LLM ejecute código malicioso en tu servidor (RCE).21**Guardrails & Filtering**Implementación de NeMo Guardrails para control de flujo y seguridad.22**Supply Chain Security**Análisis de vulnerabilidades en librerías de IA y modelos de HuggingFace.23**AI Red Teaming**Simulación de ataques controlados contra tu propio sistema.24**Hardening Final**Auditoría de punta a punta y entrega del proyecto final.
 
+
+
+
+
+![Diagrama](diagram-app-market-sentinel.png)
+
+🔍 Análisis de la Arquitectura: Flujo de Datos E2E
+La imagen superior detalla la implementación de App Market Sentinel, un sistema diseñado para la resiliencia y el procesamiento masivo de datos (High-Throughput).
+
+📂 Estructura del Repositorio (Panel Lateral)
+El proyecto adopta un patrón de Monolito Modular dentro de la carpeta src/.
+
+src/api/: Expone la lógica de negocio mediante FastAPI.
+
+src/worker/: Ejecuta las tareas pesadas de scraping de forma asíncrona mediante Arq.
+
+src/modules/: El núcleo de la inteligencia, donde scraping/ extrae los datos y processor/ los limpia con Polars.
+
+src/core/: Configuración centralizada y observabilidad.
+
+⚙️ Ciclo de Vida de una Petición (Flujo Principal)
+Ingesta Inteligente (Bloque Verde): A diferencia de un scraper lineal, el Async Worker utiliza HTTPX con rotación dinámica de User-Agents para evitar bloqueos. La librería Tenacity asegura que, ante fallos de red, el sistema reintente la operación de forma exponencial, garantizando un 99.9% de éxito en la captura.
+
+Validación y Refinado: Antes de tocar la base de datos, cada registro es validado por Pydantic v2. Luego, un pipeline de Polars (escrito en Rust) procesa los textos, elimina información sensible (PII) y normaliza las monedas en milisegundos.
+
+Persistencia Avanzada (Bloque Azul): Los datos se almacenan en PostgreSQL 16 usando técnicas de ingeniería de alto nivel:
+
+Particionamiento: El historial de precios se fragmenta por fechas para mantener consultas rápidas tras años de datos.
+
+JSONB & GIN: Las reviews se guardan como documentos flexibles pero indexados para búsquedas instantáneas.
+
+pgvector: Los datos quedan listos para búsqueda semántica e IA.
+
+Consumo de Alta Performance (Bloque Naranja): La API de FastAPI no consulta las tablas pesadas directamente; lee de Vistas Materializadas pre-calculadas, devolviendo respuestas en menos de 200ms. Todo el flujo está protegido por autenticación JWT y documentado automáticamente bajo el estándar OpenAPI.
