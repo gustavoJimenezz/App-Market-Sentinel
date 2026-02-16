@@ -210,6 +210,17 @@ files = [
 ]
 
 [[package]]
+name = "fake-useragent"
+version = "2.2.0"
+description = "Up-to-date simple useragent faker with real world database"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "fake_useragent-2.2.0-py3-none-any.whl", hash = "sha256:67f35ca4d847b0d298187443aaf020413746e56acd985a611908c73dba2daa24"},
+    {file = "fake_useragent-2.2.0.tar.gz", hash = "sha256:4e6ab6571e40cc086d788523cf9e018f618d07f9050f822ff409a4dfe17c16b2"},
+]
+
+[[package]]
 name = "fastapi"
 version = "0.115.14"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
@@ -1689,4 +1700,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "9c6a76851450a4644038a0c9644d64494ed0f0fcc5a504714d018f93da2a2dee"
+content-hash = "af8bd2f14973455f86dfee0acd2213e4f3d4b56318b0d982f35ee475db933d75"

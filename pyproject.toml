@@ -21,6 +21,7 @@ beautifulsoup4 = "^4.12"
 tenacity = "^9.0"
 structlog = "^24.4"
 alembic = "^1.14"
+fake-useragent = "^2.2.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3"

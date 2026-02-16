@@ -1,8 +1,8 @@
-import random
 from typing import Self
 
 import httpx
 import structlog
+from fake_useragent import UserAgent
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -25,6 +25,7 @@ class HTTPClient:
     def __init__(self) -> None:
         settings = get_settings()
         self._settings = settings
+        self._ua = UserAgent(browsers=["Chrome", "Firefox", "Safari"])
         self._client: httpx.AsyncClient | None = None
 
     async def __aenter__(self) -> Self:
@@ -40,7 +41,7 @@ class HTTPClient:
             self._client = None
 
     def _build_headers(self) -> dict[str, str]:
-        ua = random.choice(self._settings.scraper_user_agents)  # noqa: S311
+        ua = self._ua.random
         return {
             "User-Agent": ua,
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
