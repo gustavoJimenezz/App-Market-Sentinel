@@ -9,6 +9,7 @@ from src.modules.scraping.client import HTTPClient
 from src.modules.scraping.schemas import ScrapeResult
 from src.modules.scraping.stores.apple import AppleStoreScraper
 from src.modules.scraping.stores.google import GooglePlayScraper
+from src.modules.text_processing import process_reviews_batch
 
 logger = structlog.get_logger()
 
@@ -84,6 +85,11 @@ async def _save_scrape_result(
         )
         session.add(price)
 
+    processed_map: dict[str, dict] = {}
+    if result.reviews:
+        processed = process_reviews_batch(result.reviews)
+        processed_map = {p["external_review_id"]: p for p in processed}
+
     for review_data in result.reviews:
         existing = await session.execute(
             select(Review).where(
@@ -92,14 +98,16 @@ async def _save_scrape_result(
             )
         )
         if existing.scalar_one_or_none() is None:
+            proc = processed_map.get(review_data.external_review_id, {})
             review = Review(
                 app_id=app.id,
                 external_review_id=review_data.external_review_id,
                 rating=review_data.rating,
-                title=review_data.title,
-                content=review_data.content,
-                author_name=review_data.author_name,
+                title=proc.get("title_processed", review_data.title),
+                content=proc.get("content_processed", review_data.content),
+                author_name=proc.get("author_name_processed", review_data.author_name),
                 review_date=review_data.review_date,
+                metadata_=proc.get("processing_metadata"),
             )
             session.add(review)
 
