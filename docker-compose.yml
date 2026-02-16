@@ -39,5 +39,18 @@ services:
       redis:
         condition: service_healthy
 
+  worker:
+    build: .
+    command: arq src.worker.WorkerSettings
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+
 volumes:
   pgdata:
