@@ -1,12 +1,17 @@
 from arq.connections import ArqRedis, RedisSettings, create_pool
 from fastapi import FastAPI, HTTPException
 
+from src.api.routers import apps, prices, reviews
 from src.core.config import get_settings
 
 settings = get_settings()
 
 app = FastAPI(
     title=settings.app_name,
+    description=(
+        "Async-first SaaS & App Store analytics platform for competitive intelligence."
+    ),
+    version="0.1.0",
     debug=settings.debug,
 )
 
@@ -41,15 +46,20 @@ async def _close_arq_pool() -> None:
         _arq_pool = None
 
 
-@app.get("/health")
+@app.get("/health", tags=["system"])
 async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.post("/scrape/{app_id}")
+@app.post("/scrape/{app_id}", tags=["scraping"])
 async def scrape_app(app_id: str) -> dict[str, str]:
     pool = await _get_arq_pool()
     job = await pool.enqueue_job("scrape_app_task", app_id)
     if job is None:
         raise HTTPException(status_code=409, detail="Job already enqueued")
     return {"job_id": job.job_id}
+
+
+app.include_router(apps.router)
+app.include_router(prices.router)
+app.include_router(reviews.router)
