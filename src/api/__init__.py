@@ -1,7 +1,7 @@
 from arq.connections import ArqRedis, RedisSettings, create_pool
 from fastapi import FastAPI, HTTPException
 
-from src.api.routers import apps, prices, reviews
+from src.api.routers import analytics, apps, prices, reviews
 from src.core.config import get_settings
 
 settings = get_settings()
@@ -63,3 +63,4 @@ async def scrape_app(app_id: str) -> dict[str, str]:
 app.include_router(apps.router)
 app.include_router(prices.router)
 app.include_router(reviews.router)
+app.include_router(analytics.router)

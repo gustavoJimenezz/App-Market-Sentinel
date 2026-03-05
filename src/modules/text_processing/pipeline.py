@@ -6,8 +6,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from src.modules.text_processing.anonymizers import anonymize_author_name, anonymize_pii
-from src.modules.text_processing.cleaners import clean_text
+from src.modules.text_processing.anonymizers import anonymize_author_name
 from src.modules.text_processing.patterns import (
     CREDIT_CARD_MASK,
     CREDIT_CARD_PATTERN,

@@ -4,6 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import (
+    BigInteger,
     DateTime,
     Enum,
     ForeignKey,
@@ -119,3 +120,22 @@ class Review(TimestampMixin, Base):
         Index("ix_reviews_metadata", "metadata", postgresql_using="gin"),
         Index("ix_reviews_app_id_review_date", "app_id", "review_date"),
     )
+
+
+class PriceTrend(Base):
+    """Read-only mapping to the price_trends materialized view.
+
+    This class is never used for INSERT/UPDATE — the MV is populated
+    by PostgreSQL via REFRESH MATERIALIZED VIEW CONCURRENTLY.
+    """
+
+    __tablename__ = "price_trends"
+
+    app_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    currency: Mapped[str] = mapped_column(String(3), primary_key=True)
+    region: Mapped[str] = mapped_column(String(5), primary_key=True)
+    week: Mapped[datetime] = mapped_column(DateTime(timezone=True), primary_key=True)
+    min_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    max_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    avg_price: Mapped[Decimal] = mapped_column(Numeric(10, 4), nullable=False)
+    sample_count: Mapped[int] = mapped_column(BigInteger, nullable=False)

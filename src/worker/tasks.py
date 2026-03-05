@@ -1,7 +1,7 @@
 import uuid
 
 import structlog
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 from src.core.database import async_session_factory
 from src.modules.apps.models import App, AppStore, PriceHistory, Review
@@ -56,6 +56,25 @@ async def scrape_batch_task(ctx: dict, app_ids: list[str]) -> dict:
 
     log.info("scrape_batch_task_done", enqueued=enqueued)
     return {"enqueued": enqueued}
+
+
+async def refresh_price_trends(ctx: dict) -> dict:
+    """Refresh the price_trends materialized view.
+
+    Uses CONCURRENTLY so reads are not blocked during the refresh.
+    Requires the unique index ix_price_trends_pk to exist.
+    """
+    log = logger.bind(task="refresh_price_trends")
+    log.info("refresh_price_trends_start")
+
+    async with async_session_factory() as session:
+        await session.execute(
+            text("REFRESH MATERIALIZED VIEW CONCURRENTLY price_trends")
+        )
+        await session.commit()
+
+    log.info("refresh_price_trends_done")
+    return {"refreshed": True}
 
 
 async def _save_scrape_result(

@@ -54,6 +54,19 @@ class ReviewResponse(BaseModel):
     updated_at: datetime
 
 
+class PriceTrendResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    app_id: uuid.UUID
+    currency: str
+    region: str
+    week: datetime
+    min_price: Decimal
+    max_price: Decimal
+    avg_price: Decimal
+    sample_count: int
+
+
 class PaginatedResponse(BaseModel, Generic[T]):
     items: list[T]
     next_cursor: str | None

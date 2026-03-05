@@ -3,7 +3,7 @@ from arq import cron  # noqa: F401
 from arq.connections import RedisSettings
 
 from src.core.config import get_settings
-from src.worker.tasks import scrape_app_task, scrape_batch_task
+from src.worker.tasks import refresh_price_trends, scrape_app_task, scrape_batch_task
 
 logger = structlog.get_logger()
 
@@ -32,7 +32,7 @@ def _redis_settings() -> RedisSettings:
 
 
 class WorkerSettings:
-    functions = [scrape_app_task, scrape_batch_task]
+    functions = [scrape_app_task, scrape_batch_task, refresh_price_trends]
     on_startup = startup
     on_shutdown = shutdown
     redis_settings = _redis_settings()

@@ -1,6 +1,5 @@
 """Tests for text cleaning functions."""
 
-import pytest
 
 from src.modules.text_processing.cleaners import (
     clean_text,
