@@ -22,8 +22,10 @@ def _get_scraper(
     return GooglePlayScraper(client)
 
 
-async def scrape_app_task(ctx: dict, app_id: str) -> dict:
-    log = logger.bind(app_id=app_id)
+async def scrape_app_task(
+    ctx: dict, app_id: str, correlation_id: str | None = None
+) -> dict:
+    log = logger.bind(app_id=app_id, correlation_id=correlation_id)
     log.info("scrape_app_task_start")
 
     async with async_session_factory() as session:
@@ -43,15 +45,17 @@ async def scrape_app_task(ctx: dict, app_id: str) -> dict:
         return {"success": scrape_result.success, "error": scrape_result.error}
 
 
-async def scrape_batch_task(ctx: dict, app_ids: list[str]) -> dict:
-    log = logger.bind(batch_size=len(app_ids))
+async def scrape_batch_task(
+    ctx: dict, app_ids: list[str], correlation_id: str | None = None
+) -> dict:
+    log = logger.bind(batch_size=len(app_ids), correlation_id=correlation_id)
     log.info("scrape_batch_task_start")
 
     pool = ctx.get("redis")
     enqueued = 0
     for app_id in app_ids:
         if pool is not None:
-            await pool.enqueue_job("scrape_app_task", app_id)
+            await pool.enqueue_job("scrape_app_task", app_id, correlation_id)
         enqueued += 1
 
     log.info("scrape_batch_task_done", enqueued=enqueued)

@@ -1,10 +1,14 @@
+import structlog
 from arq.connections import ArqRedis, RedisSettings, create_pool
 from fastapi import FastAPI, HTTPException
 
+from src.api.middleware import CorrelationIdMiddleware
 from src.api.routers import analytics, apps, prices, reviews
 from src.core.config import get_settings
+from src.core.logging import setup_logging
 
 settings = get_settings()
+setup_logging(settings.log_level)
 
 app = FastAPI(
     title=settings.app_name,
@@ -14,6 +18,8 @@ app = FastAPI(
     version="0.1.0",
     debug=settings.debug,
 )
+
+app.add_middleware(CorrelationIdMiddleware)
 
 _arq_pool: ArqRedis | None = None
 
@@ -54,7 +60,9 @@ async def health() -> dict[str, str]:
 @app.post("/scrape/{app_id}", tags=["scraping"])
 async def scrape_app(app_id: str) -> dict[str, str]:
     pool = await _get_arq_pool()
-    job = await pool.enqueue_job("scrape_app_task", app_id)
+    ctx_vars = structlog.contextvars.get_contextvars()
+    correlation_id = ctx_vars.get("correlation_id")
+    job = await pool.enqueue_job("scrape_app_task", app_id, correlation_id)
     if job is None:
         raise HTTPException(status_code=409, detail="Job already enqueued")
     return {"job_id": job.job_id}

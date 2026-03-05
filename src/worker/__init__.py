@@ -3,12 +3,15 @@ from arq import cron  # noqa: F401
 from arq.connections import RedisSettings
 
 from src.core.config import get_settings
+from src.core.logging import setup_logging
 from src.worker.tasks import refresh_price_trends, scrape_app_task, scrape_batch_task
 
 logger = structlog.get_logger()
 
 
 async def startup(ctx: dict) -> None:
+    settings = get_settings()
+    setup_logging(settings.log_level)
     logger.info("worker_startup")
 
 
